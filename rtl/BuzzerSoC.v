@@ -313,13 +313,168 @@ module BuzzerSoC(input  wire clk,
     );
 
 //------------------------------------------------------------------------------
+// Synq AHB to APB Bridge
+//------------------------------------------------------------------------------
+
+    cmsdk_ahb_to_apb #(
+        .ADDRWIDTH(16),
+        .REGISTER_RDATA(0),
+        .REGISTER_WDATA(0)
+    ) ahb_to_apb(
+        //General Signals
+        .HCLK           (),
+        .HRESETn        (),
+        .PCLKEN         (),
+
+        //AHB Port
+        .HSEL           (),
+        .HADDR          (),
+        .HTRANS         (),
+        .HSIZE          (),
+        .HPROT          (),
+        .HWRITE         (),
+        .HREADY         (),
+        .HWDATA         (),
+        
+        .HREADYOUT      (),
+        .HRDATA         (),
+        .HRESP          (),
+
+        //APB Port
+        .PADDR          (),
+        .PENABLE        (),
+        .PWRITE         (),
+        .PSTRB          (),
+        .PPROT          (),
+        .PWDATA         (),
+        .PSEL           (),
+
+        .APBACTIVE      (),
+        
+        .PRDATA         (),
+        .PREADY         (),
+        .PSLVERR        ()
+    );
+
+//------------------------------------------------------------------------------
+// APB Slave MUX
+//------------------------------------------------------------------------------
+
+    cmsdk_apb_slave_mux #(
+        .PORT0_ENABLE (1),
+        .PORT1_ENABLE (1),
+        .PORT2_ENABLE (0),
+        .PORT3_ENABLE (0),
+        .PORT4_ENABLE (0),
+        .PORT5_ENABLE (0),
+        .PORT6_ENABLE (0),
+        .PORT7_ENABLE (0),
+        .PORT8_ENABLE (0),
+        .PORT9_ENABLE (0),
+        .PORT10_ENABLE(0),
+        .PORT11_ENABLE(0),
+        .PORT12_ENABLE(0),
+        .PORT13_ENABLE(0),
+        .PORT14_ENABLE(0),
+        .PORT15_ENABLE(0)
+    )
+    cmsdk_apb_slave_mux(
+        .DECODE4BIT     (),
+        .PSEL           (),
+
+        .PSEL0          (),
+        .PREADY0        (),
+        .PRDATA0        (),
+        .PSLVERR0       (),
+
+        .PSEL1          (),
+        .PREADY1        (),
+        .PRDATA1        (),
+        .PSLVERR1       (),
+
+        .PSEL2          (),
+        .PREADY2        (1'b0),
+        .PRDATA2        (32'b0),
+        .PSLVERR2       (1'b0),
+
+        .PSEL3          (),
+        .PREADY3        (1'b0),
+        .PRDATA3        (32'b0),
+        .PSLVERR3       (1'b0),
+
+        .PSEL4          (),
+        .PREADY4        (1'b0),
+        .PRDATA4        (32'b0),
+        .PSLVERR4       (1'b0),
+
+        .PSEL5          (),
+        .PREADY5        (1'b0),
+        .PRDATA5        (32'b0),
+        .PSLVERR5       (1'b0),
+
+        .PSEL6          (),
+        .PREADY6        (1'b0),
+        .PRDATA6        (32'b0),
+        .PSLVERR6       (1'b0),
+
+        .PSEL7          (),
+        .PREADY7        (1'b0),
+        .PRDATA7        (32'b0),
+        .PSLVERR7       (1'b0),
+
+        .PSEL8          (),
+        .PREADY8        (1'b0),
+        .PRDATA8        (32'b0),
+        .PSLVERR8       (1'b0),
+
+        .PSEL9          (),
+        .PREADY9        (1'b0),
+        .PRDATA9        (32'b0),
+        .PSLVERR9       (1'b0),
+
+        .PSEL10         (),
+        .PREADY10       (1'b0),
+        .PRDATA10       (32'b0),
+        .PSLVERR10      (1'b0),
+
+        .PSEL11         (),
+        .PREADY11       (1'b0),
+        .PRDATA11       (32'b0),
+        .PSLVERR11      (1'b0),
+
+        .PSEL12         (),
+        .PREADY12       (1'b0),
+        .PRDATA12       (32'b0),
+        .PSLVERR12      (1'b0),
+
+        .PSEL13         (),
+        .PREADY13       (1'b0),
+        .PRDATA13       (32'b0),
+        .PSLVERR13      (1'b0),
+
+        .PSEL14         (),
+        .PREADY14       (1'b0),
+        .PRDATA14       (32'b0),
+        .PSLVERR14      (1'b0),
+
+        .PSEL15         (),
+        .PREADY15       (1'b0),
+        .PRDATA15       (32'b0),
+        .PSLVERR15      (1'b0),
+
+        .PREADY         (),
+        .PRDATA         (),
+        .PSLVERR        ()
+    );
+
+//------------------------------------------------------------------------------
 // Instantiate Buzzer
 //------------------------------------------------------------------------------
 
     Buzzer #(.isSim(0) ,.isAHB(1)) Buzzer(
         //General Signals
-        .clk             (clk),
-        .rst_n           (cpuresetn),
+        .clk            (clk),
+        .rst_n          (cpuresetn),
         
         //BDMAC Master Port
         .BDMAC_RDATA    (BDMAC_HRDATA),
