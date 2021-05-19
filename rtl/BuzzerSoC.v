@@ -316,7 +316,7 @@ module BuzzerSoC(input  wire clk,
 // Instantiate Buzzer
 //------------------------------------------------------------------------------
 
-    Buzzer #(.isSim(0)) Buzzer(
+    Buzzer #(.isSim(0) ,.isAHB(1)) Buzzer(
         //General Signals
         .clk             (clk),
         .rst_n           (cpuresetn),
