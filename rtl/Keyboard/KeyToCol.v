@@ -2,11 +2,11 @@ module KeyToCol(input wire clk,rst_n,
                 input wire[3:0] col_in,
                 output reg[3:0] row,col_out,
                 output reg[1:0] hi,
-                output wire row_rdy);
+                output wire row_rdy,
+                output reg[15:0] row_old);
 
     reg[19:0] cnt;
     reg[3:0] col1,col2;
-    reg[15:0] row_old;
     reg[1:0] rowcnt;
     reg rowcnt1;
     reg sa_clk;
