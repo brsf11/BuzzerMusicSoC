@@ -5,5 +5,14 @@ extern bool isPlaying;
 
 void KEY(void)
 {
-	StopBGM();
+	if(isPlaying)
+	{
+		StopBGM();
+		isPlaying = false;
+	}
+	else
+	{
+		StartBGM();
+		isPlaying = true;
+	}
 }

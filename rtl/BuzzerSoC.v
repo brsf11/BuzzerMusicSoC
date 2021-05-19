@@ -631,7 +631,7 @@ wire [3:0]  RAMDATA_WRITE;
 
     APB_Keyboard APB_Keyboard(
         .clk            (clk),
-        .rst_n          (rst_n),
+        .rst_n          (cpuresetn),
         .col_in         (col),
         .row            (row),
         .PRDATA         (Keyboard_PRDATA),

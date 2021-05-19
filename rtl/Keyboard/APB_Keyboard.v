@@ -34,7 +34,7 @@ module APB_Keyboard(input wire clk,rst_n,
         end
     end
 
-    assign KeyboardINT = row_rdy&(|col_out);
+    assign KeyboardINT = row_rdy&(|(~col_out));
     assign PRDATA = {KeyINT,~keyn};
 
 endmodule
