@@ -1,4 +1,5 @@
 #include"code_def.h"
+#include<stdbool.h>
 
 char Music_Code[]={ 0x16,0x03,0x21,0x03,0x23,0x03,0x26,0x03,
                     0x31,0x03,0x33,0x03,0x17,0x03,0x22,0x03,
@@ -38,15 +39,13 @@ char Music_Code[]={ 0x16,0x03,0x21,0x03,0x23,0x03,0x26,0x03,
 
 char Sound[]     ={ 0x32,0x02,0x00,0x00};
 
+bool isPlaying;
+
 int main()
 {
+		NVIC_CTRL_ADDR = 1;
     PlayBGM(Music_Code,false);
-    Delay(8000000);
-    StopBGM();
-    Delay(8000000);
-    StartBGM();
-    Delay(8000000);
-    PlaySound(Sound,1);
+		isPlaying = true;
     while(1);
     return 0;
 }

@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include "code_def.h"
 
-uint32_t key_flag;
+extern bool isPlaying;
 
 void KEY(void)
 {
-	key_flag = 1;
+	StopBGM();
 }
