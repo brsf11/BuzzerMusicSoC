@@ -1,0 +1,8 @@
+/modelsim/
+/keil/
+!/keil/code.ini
+/rtl/APB/
+/rtl/BuzzerSoCBusMtx/
+/rtl/cortexm0ds_logic.v
+/vivado/
+!/vivado/pin.xdc
