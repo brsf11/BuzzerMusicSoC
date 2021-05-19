@@ -23,7 +23,7 @@ module BuzzerSoC(input  wire clk,
 
     wire KeyboardINT;
     wire [31:0] IRQ;
-    assign IRQ = 32'b0;
+    assign IRQ = {31'b0,KeyboardINT};
 
     wire RXEV;
     assign RXEV = 1'b0;
