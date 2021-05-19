@@ -2,6 +2,8 @@ module BuzzerSoC(input  wire clk,
                  input  wire RSTn,
                  inout  wire SWDIO,  
                  input  wire SWCLK,
+                 input  wire[3:0] col,
+                 output wire[3:0] row,
                  output wire PWM);
  
 //------------------------------------------------------------------------------
@@ -509,13 +511,12 @@ module BuzzerSoC(input  wire clk,
 // AHB RAMCODE
 //------------------------------------------------------------------------------
 
-wire [31:0] RAMCODE_RDATA,RAMCODE_WDATA;
-wire [13:0] RAMCODE_WADDR;
-wire [13:0] RAMCODE_RADDR;
-wire [3:0]  RAMCODE_WRITE;
+    wire [31:0] RAMCODE_RDATA,RAMCODE_WDATA;
+    wire [13:0] RAMCODE_WADDR;
+    wire [13:0] RAMCODE_RADDR;
+    wire [3:0]  RAMCODE_WRITE;
 
-AHBlite_Block_RAM RAMCODE_Interface(
-        /* Connect to Interconnect Port 0 */
+    AHBlite_Block_RAM RAMCODE_Interface(
         .HCLK           (clk),
         .HRESETn        (cpuresetn),
         .HSEL           (RAMCODE_HSEL),
@@ -534,8 +535,7 @@ AHBlite_Block_RAM RAMCODE_Interface(
         .BRAM_RDATA     (RAMCODE_RDATA),
         .BRAM_WDATA     (RAMCODE_WDATA),
         .BRAM_WRITE     (RAMCODE_WRITE)
-        /**********************************/
-);
+    );
 
 //------------------------------------------------------------------------------
 // AHB RAMDATA
@@ -547,8 +547,7 @@ wire [13:0] RAMDATA_WADDR;
 wire [13:0] RAMDATA_RADDR;
 wire [3:0]  RAMDATA_WRITE;
 
-AHBlite_Block_RAM RAMDATA_Interface(
-        /* Connect to Interconnect Port 1 */
+    AHBlite_Block_RAM RAMDATA_Interface(
         .HCLK           (clk),
         .HRESETn        (cpuresetn),
         .HSEL           (RAMDATA_HSEL),
@@ -567,30 +566,42 @@ AHBlite_Block_RAM RAMDATA_Interface(
         .BRAM_WDATA     (RAMDATA_WDATA),
         .BRAM_RDATA     (RAMDATA_RDATA),
         .BRAM_WRITE     (RAMDATA_WRITE)
-        /**********************************/
-);
+    );
 
 //------------------------------------------------------------------------------
 // RAM
 //------------------------------------------------------------------------------
 
-Block_RAM RAM_CODE(
+    Block_RAM RAM_CODE(
         .clka           (clk),
         .addra          (RAMCODE_WADDR),
         .addrb          (RAMCODE_RADDR),
         .dina           (RAMCODE_WDATA),
         .doutb          (RAMCODE_RDATA),
         .wea            (RAMCODE_WRITE)
-);
+    );
 
-Block_RAM RAM_DATA(
+    Block_RAM RAM_DATA(
         .clka           (clk),
         .addra          (RAMDATA_WADDR),
         .addrb          (RAMDATA_RADDR),
         .dina           (RAMDATA_WDATA),
         .doutb          (RAMDATA_RDATA),
         .wea            (RAMDATA_WRITE)
-);
+    );
+
+//------------------------------------------------------------------------------
+// APB_Keyboard
+//------------------------------------------------------------------------------
+
+    APB_Keyboard APB_Keyboard(
+        .clk            (clk),
+        .rst_n          (rst_n),
+        .col_in         (col),
+        .row            (row),
+        .PRDATA         (),
+        .KeyboardINT    ()
+    );
 
 
 
