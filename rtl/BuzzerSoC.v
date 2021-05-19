@@ -21,6 +21,7 @@ module BuzzerSoC(input  wire clk,
 // Interrupt
 //------------------------------------------------------------------------------
 
+    wire KeyboardINT;
     wire [31:0] IRQ;
     assign IRQ = 32'b0;
 
@@ -137,16 +138,19 @@ module BuzzerSoC(input  wire clk,
 // Instantiate BuzzerSoC AHB Bus Matrix
 //------------------------------------------------------------------------------
 
-    //BDMAC port
-    wire[31:0] BDMAC_HRDATA;
-    wire       BDMAC_HREADYOUT;
-    wire[1:0]  BDMAC_HRESP;
-    wire       BDMAC_HSEL;
-    wire       BDMAC_HREADY;
-    wire[31:0] BDMAC_HADDR;
-    wire[1:0]  BDMAC_HTRANS;
-    wire       BDMAC_HWRITE;
-    wire[31:0] BDMAC_HWDATA;       
+    //AHB to APB Port
+    wire       AHB2APB_HSEL;
+    wire[31:0] AHB2APB_HADDR;
+    wire[1:0]  AHB2APB_HTRANS;
+    wire[2:0]  AHB2APB_HSIZE;
+    wire[3:0]  AHB2APB_HPROT;
+    wire       AHB2APB_HWRITE;
+    wire       AHB2APB_HREADY;
+    wire[31:0] AHB2APB_HWDATA;
+
+    wire       AHB2APB_HREADYOUT;
+    wire[31:0] AHB2APB_HRDATA;
+    wire       AHB2APB_HRESP; 
 
     //SBDMA Port
     wire[31:0] SBDMA_HADDR;
@@ -289,23 +293,23 @@ module BuzzerSoC(input  wire clk,
         .HRESPM1                            (RAMDATA_HRESP),
         .HRUSERM1                           (32'b0),
 
-        //Slave2 Signals BDMAC
-        .HSELM2                             (BDMAC_HSEL),
-        .HADDRM2                            (BDMAC_HADDR),
-        .HTRANSM2                           (BDMAC_HTRANS),
-        .HWRITEM2                           (BDMAC_HWRITE),
-        .HSIZEM2                            (),
+        //Slave2 Signals AHB2APB
+        .HSELM2                             (AHB2APB_HSEL),
+        .HADDRM2                            (AHB2APB_HADDR),
+        .HTRANSM2                           (AHB2APB_HTRANS),
+        .HWRITEM2                           (AHB2APB_HWRITE),
+        .HSIZEM2                            (AHB2APB_HSIZE),
         .HBURSTM2                           (),
-        .HPROTM2                            (),
+        .HPROTM2                            (AHB2APB_HPROT),
         .HMASTERM2                          (),
-        .HWDATAM2                           (BDMAC_HWDATA),
+        .HWDATAM2                           (AHB2APB_HWDATA),
         .HMASTLOCKM2                        (),
-        .HREADYMUXM2                        (BDMAC_HREADY),
+        .HREADYMUXM2                        (AHB2APB_HREADY),
         .HAUSERM2                           (),
         .HWUSERM2                           (),
-        .HRDATAM2                           (BDMAC_HRDATA),
-        .HREADYOUTM2                        (BDMAC_HREADYOUT),
-        .HRESPM2                            (BDMAC_HRESP),
+        .HRDATAM2                           (AHB2APB_HRDATA),
+        .HREADYOUTM2                        (AHB2APB_HREADYOUT),
+        .HRESPM2                            (AHB2APB_HRESP),
         .HRUSERM2                           (32'b0),
 
         //Scan chain
@@ -318,49 +322,74 @@ module BuzzerSoC(input  wire clk,
 // Synq AHB to APB Bridge
 //------------------------------------------------------------------------------
 
+    //APB Port
+    wire[15:0]          PADDR;
+    wire                PENABLE;
+    wire                PWRITE;
+    wire[31:0]          PWDATA;
+    wire                PSEL;
+
+    wire[31:0]          PRDATA;
+    wire                PREADY;
+    wire                PSLVERR;
+
     cmsdk_ahb_to_apb #(
         .ADDRWIDTH(16),
         .REGISTER_RDATA(0),
         .REGISTER_WDATA(0)
     ) ahb_to_apb(
         //General Signals
-        .HCLK           (),
-        .HRESETn        (),
-        .PCLKEN         (),
+        .HCLK           (clk),
+        .HRESETn        (cpuresetn),
+        .PCLKEN         (1'b1),
 
         //AHB Port
-        .HSEL           (),
-        .HADDR          (),
-        .HTRANS         (),
-        .HSIZE          (),
-        .HPROT          (),
-        .HWRITE         (),
-        .HREADY         (),
-        .HWDATA         (),
+        .HSEL           (AHB2APB_HSEL),
+        .HADDR          (AHB2APB_HADDR[15:0]),
+        .HTRANS         (AHB2APB_HTRANS),
+        .HSIZE          (AHB2APB_HSIZE),
+        .HPROT          (AHB2APB_HPROT),
+        .HWRITE         (AHB2APB_HWRITE),
+        .HREADY         (AHB2APB_HREADY),
+        .HWDATA         (AHB2APB_HWDATA),
         
-        .HREADYOUT      (),
-        .HRDATA         (),
-        .HRESP          (),
+        .HREADYOUT      (AHB2APB_HREADYOUT),
+        .HRDATA         (AHB2APB_HRDATA),
+        .HRESP          (AHB2APB_HRESP),
 
         //APB Port
-        .PADDR          (),
-        .PENABLE        (),
-        .PWRITE         (),
+        .PADDR          (PADDR),
+        .PENABLE        (PENABLE),
+        .PWRITE         (PWRITE),
         .PSTRB          (),
         .PPROT          (),
-        .PWDATA         (),
-        .PSEL           (),
+        .PWDATA         (PWDATA),
+        .PSEL           (PSEL),
 
         .APBACTIVE      (),
         
-        .PRDATA         (),
-        .PREADY         (),
-        .PSLVERR        ()
+        .PRDATA         (PRDATA),
+        .PREADY         (PREADY),
+        .PSLVERR        (PSLVERR)
     );
 
 //------------------------------------------------------------------------------
 // APB Slave MUX
 //------------------------------------------------------------------------------
+
+    //BDMAC port
+    wire[31:0] BDMAC_PRDATA;
+    wire       BDMAC_PREADYOUT;
+    wire[1:0]  BDMAC_PRESP;
+    wire       BDMAC_PSEL;
+    wire       BDMAC_PREADY;
+    wire[31:0] BDMAC_PADDR;
+    wire[1:0]  BDMAC_PTRANS;
+    wire       BDMAC_PWRITE;
+    wire[31:0] BDMAC_PWDATA;
+
+    //Keyboard Port
+
 
     cmsdk_apb_slave_mux #(
         .PORT0_ENABLE (1),
@@ -381,18 +410,18 @@ module BuzzerSoC(input  wire clk,
         .PORT15_ENABLE(0)
     )
     cmsdk_apb_slave_mux(
-        .DECODE4BIT     (),
-        .PSEL           (),
+        .DECODE4BIT     (PADDR[15:12]),
+        .PSEL           (PSEL),
 
-        .PSEL0          (),
-        .PREADY0        (),
-        .PRDATA0        (),
-        .PSLVERR0       (),
+        .PSEL0          (BDMAC_PSEL),
+        .PREADY0        (BDMAC_PREADYOUT),
+        .PRDATA0        (BDMAC_PRDATA),
+        .PSLVERR0       (1'b0),
 
         .PSEL1          (),
-        .PREADY1        (),
-        .PRDATA1        (),
-        .PSLVERR1       (),
+        .PREADY1        (1'b1),
+        .PRDATA1        (Keyboard_PRDATA),
+        .PSLVERR1       (1'b0),
 
         .PSEL2          (),
         .PREADY2        (1'b0),
@@ -464,30 +493,30 @@ module BuzzerSoC(input  wire clk,
         .PRDATA15       (32'b0),
         .PSLVERR15      (1'b0),
 
-        .PREADY         (),
-        .PRDATA         (),
-        .PSLVERR        ()
+        .PREADY         (PREADY),
+        .PRDATA         (PRDATA),
+        .PSLVERR        (PSLVERR)
     );
 
 //------------------------------------------------------------------------------
 // Instantiate Buzzer
 //------------------------------------------------------------------------------
 
-    Buzzer #(.isSim(0) ,.isAHB(1)) Buzzer(
+    Buzzer #(.isSim(0) ,.isAHB(0)) Buzzer(
         //General Signals
         .clk            (clk),
         .rst_n          (cpuresetn),
         
         //BDMAC Master Port
-        .BDMAC_RDATA    (BDMAC_HRDATA),
-        .BDMAC_READYOUT (BDMAC_HREADYOUT),
-        .BDMAC_RESP     (BDMAC_HRESP),
-        .BDMAC_SEL      (BDMAC_HSEL),
-        .BDMAC_READY    (BDMAC_HREADY),
-        .BDMAC_ADDR     (BDMAC_HADDR),
-        .BDMAC_TRANS    (BDMAC_HTRANS),
-        .BDMAC_WRITE    (BDMAC_HWRITE),
-        .BDMAC_WDATA    (BDMAC_HWDATA),
+        .BDMAC_RDATA    (BDMAC_PRDATA),
+        .BDMAC_READYOUT (BDMAC_PREADYOUT),
+        .BDMAC_RESP     (BDMAC_PRESP),
+        .BDMAC_SEL      (BDMAC_PSEL),
+        .BDMAC_READY    (BDMAC_PREADY),
+        .BDMAC_ADDR     (BDMAC_PADDR),
+        .BDMAC_TRANS    (BDMAC_PTRANS),
+        .BDMAC_WRITE    (BDMAC_PWRITE),
+        .BDMAC_WDATA    (BDMAC_PWDATA),
 
         //SBDMA Slave Port
         .SBDMA_HADDR     (SBDMA_HADDR),
@@ -506,6 +535,12 @@ module BuzzerSoC(input  wire clk,
         //PWM
         .PWM(PWM)
     );
+
+    assign BDMAC_READY = 1'b1;
+    assign BDMAC_PADDR = {16'b0,PADDR};
+    assign BDMAC_PTRANS = {1'b0,PENABLE};
+    assign BDMAC_PWRITE = PWRITE;
+    assign BDMAC_PWDATA = PWDATA;
 
 //------------------------------------------------------------------------------
 // AHB RAMCODE
@@ -599,8 +634,8 @@ wire [3:0]  RAMDATA_WRITE;
         .rst_n          (rst_n),
         .col_in         (col),
         .row            (row),
-        .PRDATA         (),
-        .KeyboardINT    ()
+        .PRDATA         (Keyboard_PRDATA),
+        .KeyboardINT    (KeyboardINT)
     );
 
 
