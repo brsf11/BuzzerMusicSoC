@@ -1,14 +1,14 @@
-module Buzzer #(parameter isSim = 0) (input wire clk,rst_n,
+module Buzzer #(parameter isSim = 0,parameter isAHB = 1) (input wire clk,rst_n,
               //BDMAC Master Port
-              output wire[31:0] BDMAC_HRDATA,
-              output wire       BDMAC_HREADYOUT,
-              output wire[1:0]  BDMAC_HRESP,
-              input wire        BDMAC_HSEL,
-			  input wire        BDMAC_HREADY,
-              input wire[31:0]  BDMAC_HADDR,
-              input wire[1:0]   BDMAC_HTRANS,
-              input wire        BDMAC_HWRITE,
-              input wire[31:0]  BDMAC_HWDATA,
+              output wire[31:0] BDMAC_RDATA,
+              output wire       BDMAC_READYOUT,
+              output wire[1:0]  BDMAC_RESP,
+              input wire        BDMAC_SEL,
+			  input wire        BDMAC_READY,
+              input wire[31:0]  BDMAC_ADDR,
+              input wire[1:0]   BDMAC_TRANS,
+              input wire        BDMAC_WRITE,
+              input wire[31:0]  BDMAC_WDATA,
               //SBDMA Slave Port
               output wire[31:0] SBDMA_HADDR,
               output wire[1:0]  SBDMA_HTRANS,
@@ -28,30 +28,57 @@ module Buzzer #(parameter isSim = 0) (input wire clk,rst_n,
 	wire[1:0] SPri;
 	wire isCyl,BisPlaying,Bstop,SisPlaying;
 	wire ref_BGM,ref_Sound;
+
+	generate
+
+		if(isAHB) begin
+			BDMAC BDMAC_BGM(
+				.clk              (clk),
+				.rst_n            (rst_n),
+				.HWRITE           (BDMAC_WRITE),
+				.HREADY           (BDMAC_READY),
+				.HSEL             (BDMAC_SEL),
+				.Bref             (ref_BGM),
+				.Sref             (ref_Sound),
+				.HTRANS           (BDMAC_TRANS),
+				.HWRDATA          (BDMAC_WDATA),
+				.HADDR            (BDMAC_ADDR),
+				.HRDDATA          (BDMAC_RDATA),
+				.BRstAddr         (BRstAddr),
+				.SRstAddr         (SRstAddr),
+				.SPri             (SPri),
+				.isCyl            (isCyl),
+				.BisPlaying       (BisPlaying),
+				.Bstop            (Bstop),
+				.SisPlaying       (SisPlaying)
+			);
+		end
+		else begin
+			APB_BDMAC APB_BDMAC(
+				.clk              (clk),
+				.rst_n            (rst_n),
+				.PWRITE           (BDMAC_WRITE),
+				.PSEL             (BDMAC_SEL),
+				.Bref             (ref_BGM),
+				.Sref             (ref_Sound),
+				.PENABLE          (BDMAC_TRANS[0]),
+				.PWRDATA          (BDMAC_WDATA),
+				.PADDR            (BDMAC_ADDR),
+				.PRDDATA          (BDMAC_RDATA),
+				.BRstAddr         (BRstAddr),
+				.SRstAddr         (SRstAddr),
+				.SPri             (SPri),
+				.isCyl            (isCyl),
+				.BisPlaying       (BisPlaying),
+				.Bstop            (Bstop),
+				.SisPlaying       (SisPlaying)
+			);
+		end
+
+	endgenerate
 	
-	BDMAC BDMAC_BGM(
-		.clk              (clk),
-		.rst_n            (rst_n),
-		.HWRITE           (BDMAC_HWRITE),
-		.HREADY           (BDMAC_HREADY),
-		.HSEL             (BDMAC_HSEL),
-		.Bref             (ref_BGM),
-		.Sref             (ref_Sound),
-		.HTRANS           (BDMAC_HTRANS),
-		.HWRDATA          (BDMAC_HWDATA),
-		.HADDR            (BDMAC_HADDR),
-		.HRDDATA          (BDMAC_HRDATA),
-		.BRstAddr         (BRstAddr),
-		.SRstAddr         (SRstAddr),
-		.SPri             (SPri),
-		.isCyl            (isCyl),
-		.BisPlaying       (BisPlaying),
-		.Bstop            (Bstop),
-		.SisPlaying       (SisPlaying)
-    );
-	
-	assign BDMAC_HREADYOUT = 1'b1;
-	assign BDMAC_HRESP     = 2'b00;
+	assign BDMAC_READYOUT = 1'b1;
+	assign BDMAC_RESP     = 2'b00;
 
     //BGM
 	wire BeatFinish_BGM,BReady_BGM;
