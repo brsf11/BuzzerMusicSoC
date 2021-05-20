@@ -6,3 +6,4 @@
 /rtl/cortexm0ds_logic.v
 !/vivado/pin.xdc
 /vivado/
+*.png
