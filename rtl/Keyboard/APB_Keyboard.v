@@ -17,7 +17,7 @@ module APB_Keyboard(input wire clk,rst_n,
         .col_out  (col_out),
         .hi       (hi),
         .row_rdy  (row_rdy),
-        .row_old  (key)
+        .row_old  (keyn)
     );
 
     always @(posedge clk or negedge rst_n) begin

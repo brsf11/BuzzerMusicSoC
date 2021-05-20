@@ -16,8 +16,14 @@ typedef struct
 #define Buzzer_BASE 0x40000000
 #define Buzzer ((BuzzerStr *)Buzzer_BASE)
 
+//Keyboard
+
+#define Keyboard_BASE 0x40001000
+#define KeyboardReg (*(uint32_t *)Keyboard_BASE)
+
 void Delay(int interval);
 void PlayBGM(char* BeginAddr,bool isCyl);
 void StopBGM(void);
 void StartBGM(void);
+void ResetBGM(void);
 void PlaySound(char* BeginAddr,uint32_t Pri);

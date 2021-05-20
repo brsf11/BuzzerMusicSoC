@@ -38,3 +38,8 @@ void PlaySound(char* BeginAddr,uint32_t Pri)
     Buzzer->BuzzerSoundAddr = (uint32_t)BeginAddr;
     Buzzer->BuzzerSoundCtr  = (Pri << 1) + 1;
 }
+
+void ResetBGM()
+{
+    Buzzer->BuzzerBGMCtr &= 0;
+}
