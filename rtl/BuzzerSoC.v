@@ -390,6 +390,8 @@ module BuzzerSoC(input  wire clk,
 
     //Keyboard Port
 
+    wire[31:0] Keyboard_PRDATA;
+
 
     cmsdk_apb_slave_mux #(
         .PORT0_ENABLE (1),

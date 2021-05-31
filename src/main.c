@@ -127,7 +127,7 @@ void KEY()
       isPlaying = true;
     }
 	}
-  else //if(KeyReg & 0x00000002)
+  else if(KeyReg & 0x00000002)
 	{
 		if(Music_num == 1)
 		{
